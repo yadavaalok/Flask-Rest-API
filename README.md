@@ -179,7 +179,7 @@ Request BODY:
 {
         
         "name": "ABCDEF",
-        "gender": "MF
+        "gender": "M",
         "dob": "01/01/2001",
         "contact_no.": "+91xxxxxxxxx",
         "city": "MUMBAI",

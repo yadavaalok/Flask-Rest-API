@@ -1,53 +1,101 @@
 from flask import Blueprint,jsonify,request,json
 from .models import *
+import requests
+from .param_validation import *
+from .db_operations import *
+
 
 view = Blueprint('view',__name__)
 
 
 
-@view.route('/')
+@view.route('/home')
 def home():
-	return "<h1>Assignment</h1>",200
+	return "Hello World",200
 
 
+"""
+#query string paramter validation for student 
+def studentParamValidate(**kwargs):
+	flag=False
+
+	if ('name' in kwargs):
+		try:
+			int(kwargs['name'])
+			flag=True
+		except:
+			pass
+
+	if ('gender' in kwargs):
+		try:
+			int(kwargs['gender'])
+			flag=True
+		except:
+			pass
+
+
+	if ('city' in kwargs):
+		try:
+			int(kwargs['city'])
+			flag=True
+		except:
+			pass
+	return flag
+"""
+
+"""
+#Valid length of contact number
+def contactLengthValidate(contact):
+	if len(contact)!=13:
+		return True
+	return False
+"""
+
+"""
+#subject fields validation
+def subjectParamValidate(**data):
+	flag=0
+	if 'name' in data:
+		try:
+			int(data['name'])
+			flag=1
+		except:
+			pass
+
+	if ('sub_id' in data) and (type(data['sub_id'])!=int):
+		flag=1 
+
+	if ('marks' in data) and (type(data['marks'])!=int):
+		flag=1
+
+
+
+	return flag
+"""
 
 @view.route('/student',methods=['GET','POST'])
 def student():
-
+	
 	if request.method=='GET':
-		args=request.args
+		kwargs=dict(request.args)
 		""" CONSIDERING 3 PARAMETERS: NAME,GENDER,CITY"""
-		if args: 
-			if ('name' in args):
-				try:
-					int(args['name'])
-					return "Bad Request",400
-				except:
-					pass
+		if kwargs:
+			
 
-			if ('gender' in args):
-				try:
-					int(args['gender'])
-					return "Bad Request",400
-				except:
-					pass
-
-
-			if ('city' in args):
-				try:
-					int(args['city'])
-					return "Bad Request",400
-				except:
-					pass
+			if studentParamValidate(**kwargs):
+				return "Bad Request",400
 
 				
-			s=Student.query.filter_by(**args).all()
+			#s=Student.query.filter_by(**kwargs).all()
+			s=get_student_query(**kwargs)
 			if s:
 				return jsonify([ss.json() for ss in s]),200
 			return {"message":"No Data present for the given query string"},404
 
 		else:
-			s=Student.query.all()
+			#s=Student.query.all()
+			s=get_student_query()
+			
 			if len(s):
 				return jsonify([ss.json() for ss in s]),200
 			else:
@@ -59,72 +107,47 @@ def student():
 		data=json.loads(request.data)
 
 		#CHeck whether all the required columns data are present in the request
-		required_data={'Name','gender','DOB','City','Contact','Subjects'}
+		required_data={'name','gender','dob','city','contact','subjects'}
 		if required_data>data.keys():
 			return "Kindly fill all the details required for student",400
 
 
-		name=data['Name']
+		name=data['name']
 		gender=data['gender']
-		dob=data['DOB']
-		city=data['City']
-		contact_no=data['Contact']
+		dob=data['dob']
+		city=data['city']
+		contact_no=data['contact']
 
 		#Checking whether the type of data is valid or invalid
-
-		try:
-			int(name)
+		if studentParamValidate(**data):
 			return "Bad Request",400
-		except:
-			pass
-
-		try:
-			int(gender)
-			return "Bad Request",400
-		except:
-			pass
-
-		try:
-			int(city)
-			return "Bad Request",400
-		except:
-			pass
 		
 
 		#Checking the contact number is proper or not
 
-		if len(contact_no)!=13:
+		if contactLengthValidate(contact_no):
 			return "Kindly enter contact in following format: +91(10 digits number)",400
 
 		s=Student(name,gender,dob,contact_no,city)
-		db.session.add(s)
-		db.session.commit()
-		subjects=data['Subjects']
+		subjects=data['subjects']
 		for sub in subjects:
 
 			#Checking whether sub_id and marks are integer type or not
-			try:
-				int(sub['Sub_id'])
-				pass
-			except:
-				return "Bad Request",400
-
-			try:
-				int(sub['Marks'])
-				pass
-			except:
+			if subjectParamValidate(**sub):
 				return "Bad Request",400
 
 
-			sub_obj=Subject.query.filter_by(sub_id=sub['Sub_id']).first()
+			#sub_obj=Subject.query.filter_by(sub_id=sub['sub_id']).first()
+			sub_obj=get_subject_query(sub['sub_id'])
+
 
 			#Checking whether the provided subject id is present in our database or not
 			if sub_obj==None:
 				return "Entered Subject id not present",404
 
-			s.enrolled_subjects.append(Marks(marks_obtained=sub['Marks'],subject=sub_obj))
-			db.session.add(s)
-			db.session.commit()
+			s.enrolled_subjects.append(Marks(marks_obtained=sub['marks'],subject=sub_obj))
+		db.session.add(s)
+		db.session.commit()
 			
 		return "Student Data Added Successfully",201
 
@@ -134,9 +157,9 @@ def student():
 @view.route('/subject',methods=['GET','POST'])
 def subject():
 
-
 	if request.method=='GET':
-		sub=Subject.query.all()
+
+		sub=get_subject_query()
 		if len(sub):
 			return jsonify([ss.json() for ss in sub]),200
 		else:
@@ -148,19 +171,16 @@ def subject():
 		data=json.loads(request.data)
 
 		#Check whether all required fields are provided
-		required_fields={'Name'}
+		required_fields={'name'}
 		if required_fields>data.keys():
 			return "Kindly enter all required fields of subject",400
 
-		sub=Subject(data['Name'])
+		sub=Subject(data['name'])
 		
 
 		#Check whether correct type of data is provided for the respective fields
-		try:
-			int(data['Name'])
+		if subjectParamValidate(**data):
 			return "Bad Request",400
-		except:
-			pass
 
 		db.session.add(sub)
 		db.session.commit()
@@ -173,8 +193,7 @@ def subject():
 def student_id(id):
 
 
-	s=Student.query.filter_by(roll_no=id).first()
-
+	s=get_student_by_id_query(id)
 
 	#Checking if the student with the given id is present
 	if not s:
@@ -188,68 +207,46 @@ def student_id(id):
 		data=json.loads(request.data)
 
 		#CHeck whether all the required fields are present in the request
-		required_data={'Name','gender','DOB','City','Contact','Subjects'}
+		required_data={'name','gender','dob','city','contact','subjects'}
 		if required_data>data.keys():
 			return "Kindly fill all the details required for student",400
 		
-		s.name=data['Name']
+		s.name=data['name']
 		s.gender=data['gender']
-		s.dob=data['DOB']
-		s.city=data['City']
-		s.contact_no=data['Contact']
+		s.dob=data['dob']
+		s.city=data['city']
+		s.contact_no=data['contact']
 
 		#Checking whether correct type of data is provided for each field.
-		try:
-			int(s.name)
+		if studentParamValidate(**data):
 			return "Bad Request",400
-		except:
-			pass
-
-		try:
-			int(s.gender)
-			return "Bad Request",400
-		except:
-			pass
-
-		try:
-			int(s.city)
-			return "Bad Request",400
-		except:
-			pass
 
 		#Checking whether contact number is proper
-		if len(data['Contact'])!=13:
+		if contactLengthValidate(data['contact']):
 			return "Kindly enter contact in following format: +91(10 digits number)",400
 
 
-		subjects=data['Subjects']
+		subjects=data['subjects']
 		marks_obj=s.enrolled_subjects
 		for m in marks_obj:
 			for sub in subjects:
 				
 				#Checking whether sub_id and marks are integer type or not
-				try:
-					int(sub['Sub_id'])
-					pass
-				except:
-					return "Bad Request",400
-
-				try:
-					int(sub['Marks'])
-					pass
-				except:
+				if subjectParamValidate(**sub):
 					return "Bad Request",400
 
 
-				sub_obj=Subject.query.filter_by(sub_id=sub['Sub_id']).first()
+				#sub_obj=Subject.query.filter_by(sub_id=sub['sub_id']).first()
+				sub_obj=get_subject_query(sub['sub_id'])
+
 
 				#Checking whether the provided subject id is present in our database or not
 				if sub_obj==None:
 					return "Entered Subject id is not present",404
 
 
-				if m.sub_id==sub['Sub_id']:
-					m.marks_obtained=sub['Marks']
+				if m.sub_id==sub['sub_id']:
+					m.marks_obtained=sub['marks']
 
 		db.session.add(s)
 		db.session.commit()
@@ -267,72 +264,46 @@ def student_id(id):
 
 
 		#Checking whether correct type of data is provided
-		
-		if 'Name' in data.keys():
-			try:
-				int(data['Name'])
-				return "Bad Request",400
-			except:
-				pass
-
-		if 'gender' in data.keys():
-			try:
-				int(data['gender'])
-				return "Bad Request",400
-			except:
-				pass
-
-		if 'City' in data.keys():
-			try:
-				int(data['City'])
-				return "Bad Request",400
-			except:
-				pass
+		if studentParamValidate(**data):
+			return "Bad Request",400
 
 
 
 		#Checking whether contact number is proper
-		if 'Contact' in data.keys() and len(data['Contact'])!=13:
+		if 'contact' in data.keys() and contactLengthValidate(data['contact']):
 			return "Kindly enter contact in following format: +91(10 digits number)",400
 
 
 
 		for key,value in data.items():
-			if key.lower()=="city":
+			if key=="city":
 				s.city=value
-			elif key.lower()=="gender":
+			elif key=="gender":
 				s.gender=value
-			elif key.lower()=="contact":
+			elif key=="contact":
 				s.contact_no=value
-			elif key.lower()=="subjects":
+			elif key=="subjects":
 				subjects=value
 				marks_obj=s.enrolled_subjects
 				for m in marks_obj:
 					for sub in subjects:
 
 						#Checking type of sub_id and marks
-						try:
-							int(sub['Sub_id'])
-							pass
-						except:
-							return "Bad Request",400
-
-						try:
-							int(sub['Marks'])
-							pass
-						except:
+						if subjectParamValidate(**sub):
 							return "Bad Request",400
 
 
-						sub_obj=Subject.query.filter_by(sub_id=sub['Sub_id']).first()
+						#sub_obj=Subject.query.filter_by(sub_id=sub['sub_id']).first()
+						sub_obj=get_subject_query(sub['sub_id'])
+
 
 						#Checking whether the provided subject id is present in our database or not
 						if sub_obj==None:
 							return "Entered Subject id is not present",404
 
 
-						if m.sub_id==sub['Sub_id']:
-							m.marks_obtained=sub['Marks']			
+						if m.sub_id==sub['sub_id']:
+							m.marks_obtained=sub['marks']			
 
 		db.session.add(s)	
 		db.session.commit()
@@ -341,11 +312,10 @@ def student_id(id):
 
 
 
-
 @view.route('/subject/<int:id>',methods=['GET','PUT','DELETE'])
 def subject_id(id):
 
-	sub=Subject.query.filter_by(sub_id=id).first()
+	sub=get_subject_query(id)
 	if not sub:
 		return {"Message":"No record present for the given id"},404
 
@@ -356,20 +326,17 @@ def subject_id(id):
 		data=json.loads(request.data)
 
 		#Check whether all required fields are provided
-		required_fields={'Name'}
+		required_fields={'name'}
 		if required_fields>data.keys():
 			return "Kindly enter all required fields of subject",400
 
 
-		name=data['Name']
+		name=data['name']
 
 
 		#Check whether correct type of data is provided for the respective fields
-		try:
-			int(name)
+		if subjectParamValidate(**data):
 			return "Bad Request",400
-		except:
-			pass
 
 		sub.name=name
 		db.session.add(sub)
@@ -380,3 +347,5 @@ def subject_id(id):
 		db.session.delete(sub)
 		db.session.commit()
 		return "Subject Data Deleted Successfully",204
+
+		

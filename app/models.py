@@ -22,7 +22,7 @@ class Marks(db.Model):
 
 
 	def json(self):
-		return {"Sub_id":self.sub_id,"Marks":self.marks_obtained}
+		return {"sub_id":self.sub_id,"marks":self.marks_obtained}
 
 
 
@@ -58,7 +58,7 @@ class Student(db.Model):
 
 	def json(self):
 		sub=[m.json() for m in self.enrolled_subjects]
-		return {"Roll no":self.roll_no,"Name":self.name,"gender":self.gender,"DOB":self.dob,"Contact":self.contact_no,"City":self.city,"Subjects":sub}
+		return {"roll no":self.roll_no,"name":self.name,"gender":self.gender,"dob":self.dob,"contact":self.contact_no,"city":self.city,"subjects":sub}
 
 
 
@@ -80,4 +80,4 @@ class Subject(db.Model):
 		return f'<Subject: {self.name}>'
 
 	def json(self):
-		return {"Sub_id":self.sub_id,"Name":self.name}
+		return {"sub_id":self.sub_id,"name":self.name}

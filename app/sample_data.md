@@ -1,18 +1,18 @@
 {
 
-        "Name": "ABCD",
+        "name": "ABCD",
         "gender": "M",
-        "DOB": "01/01/2001",
-        "Contact": "+919876543210",
-        "City": "Delhi",
-        "Subjects": [
+        "dob": "01/01/2001",
+        "contact": "+919876543210",
+        "city": "Delhi",
+        "subjects": [
             {
-                "Sub_id": ,
-                "Marks": 92
+                "sub_id": ,
+                "marks": 92
             },
             {
-                "Sub_id": ,
-                "Marks": 86
+                "sub_id": ,
+                "marks": 86
             }
         ]
 }
@@ -20,30 +20,30 @@
 
 {
 
-        "Name": "MNO",
+        "name": "MNO",
         "gender": "F",
-        "DOB": "03/01/2000",
-        "Contact": "+919876543210",
-        "City": "Delhi",
-        "Subjects": [
+        "dob": "03/01/2000",
+        "contact": "+919876543210",
+        "city": "Delhi",
+        "subjects": [
             {
-                "Sub_id": ,
-                "Marks": 95
+                "sub_id": ,
+                "marks": 95
             }
         ]
 }
 
 {
 
-        "Name": "XYZ",
+        "name": "XYZ",
         "gender": "M",
-        "DOB": "01/01/1999",
-        "Contact": "+919876543210",
-        "City": "Pune",
-        "Subjects": [
+        "dob": "01/01/1999",
+        "contact": "+919876543210",
+        "city": "Pune",
+        "subjects": [
             {
-                "Sub_id": ,
-                "Marks": 80
+                "sub_id": ,
+                "marks": 80
             }
         ]
 }
@@ -51,19 +51,19 @@
 
 {
 
-        "Name": "PQRS",
+        "name": "PQRS",
         "gender": "M",
-        "DOB": "01/01/2001",
-        "Contact": "+919876543210",
-        "City": "Chennai",
-        "Subjects": [
+        "dob": "01/01/2001",
+        "contact": "+919876543210",
+        "city": "Chennai",
+        "subjects": [
             {
-                "Sub_id": ,
-                "Marks": 92
+                "sub_id": ,
+                "marks": 92
             },
             {
-                "Sub_id": ,
-                "Marks": 86
+                "sub_id": ,
+                "marks": 86
             }
         ]
 }
@@ -71,19 +71,19 @@
 
 {
 
-        "Name": "IJK",
+        "name": "IJK",
         "gender": "M",
-        "DOB": "01/01/2003",
-        "Contact": "+919876543210",
-        "City": "Chennai",
-        "Subjects": [
+        "dob": "01/01/2003",
+        "contact": "+919876543210",
+        "city": "Chennai",
+        "subjects": [
             {
-                "Sub_id": ,
-                "Marks": 92
+                "sub_id": ,
+                "marks": 92
             },
             {
-                "Sub_id": ,
-                "Marks": 86
+                "sub_id": ,
+                "marks": 86
             }
         ]
 }
@@ -91,7 +91,7 @@
 
 
 
-{"Name":"Physics"}
-{"Name":"Chemistry"}
-{"Name":"Mathematics"}
-{"Name":"Biology"}
+{"name":"Physics"}
+{"name":"Chemistry"}
+{"name":"Mathematics"}
+{"name":"Biology"}
